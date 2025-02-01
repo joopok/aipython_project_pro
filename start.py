@@ -11,10 +11,14 @@ from gantt_chart import GanttChart
 from dialogs import TaskDialog, SettingsDialog, FilterDialog
 from constants import COLORS, WINDOW_MIN_SIZE, WINDOW_SIZE_RATIO, TREE_COLUMNS
 from ui_components import ProjectTreeView, MenuBar
+from sheets import ScheduleSheet, ProgressSheet, AnalysisSheet, CalendarSheet, WorkloadSheet
+from login_dialog import LoginDialog
 
 class GanttApp(ctk.CTk):
     def __init__(self):
         super().__init__()
+        
+        # 로그인 검증 부분 제거
         self._load_fonts()  # 글꼴 로드 추가
         self._setup_window()
         self._setup_styles()
@@ -86,17 +90,35 @@ class GanttApp(ctk.CTk):
     
     def _init_ui(self):
         self._setup_main_container()
-        
-        # style 객체 생성
         self.style = ttk.Style()
         self.style.theme_use('clam')
         self._configure_treeview_style(self.style)
         
+        # 메뉴바 생성
         self.menu_bar = MenuBar(self.main_container, self)
-        self.project_tree = ProjectTreeView(self.main_container, self.style)
-        self.gantt_chart = self._setup_gantt_chart()
         
-        self._setup_layout()
+        # 노트북(탭) 생성
+        self.notebook = ttk.Notebook(self.main_container)
+        self.notebook.grid(row=1, column=0, sticky="nsew")
+        
+        # 각 시트 생성
+        self.schedule_sheet = ScheduleSheet(self.notebook)
+        self.progress_sheet = ProgressSheet(self.notebook)
+        self.analysis_sheet = AnalysisSheet(self.notebook)
+        self.calendar_sheet = CalendarSheet(self.notebook)
+        self.workload_sheet = WorkloadSheet(self.notebook)
+        
+        # 노트북에 시트 추가
+        self.notebook.add(self.schedule_sheet.frame, text="일정")
+        self.notebook.add(self.progress_sheet.frame, text="진척")
+        self.notebook.add(self.analysis_sheet.frame, text="분석")
+        self.notebook.add(self.calendar_sheet.frame, text="캘린더")
+        self.notebook.add(self.workload_sheet.frame, text="작업부하")
+        
+        # 간트 차트 생성 및 추가
+        self.gantt_chart = GanttChart(self.main_container)
+        self.gantt_chart.frame.grid(row=2, column=0, sticky="nsew")
+        
         self._bind_events()
     
     def _setup_main_container(self):
@@ -134,22 +156,113 @@ class GanttApp(ctk.CTk):
         )
     
     def _bind_events(self):
+        """이벤트 바인딩"""
         self.bind("<Configure>", self.on_window_resize)
-        self.project_tree.tree.bind("<Button-3>", self.show_context_menu)
+        # 각 시트의 트리뷰에 우클릭 메뉴 바인딩
+        self.schedule_sheet.tree.bind("<Button-3>", self.show_context_menu)
+        self.progress_sheet.tree.bind("<Button-3>", self.show_context_menu)
+        self.analysis_sheet.tree.bind("<Button-3>", self.show_context_menu)
+        self.calendar_sheet.tree.bind("<Button-3>", self.show_context_menu)
+        self.workload_sheet.tree.bind("<Button-3>", self.show_context_menu)
     
     def _load_data(self):
         """데이터 로드"""
         projects = generate_dummy_data()
-        self._load_tree_data(projects)
+        
+        # 각 시트에 데이터 로드
+        self._load_schedule_data(projects)
+        self._load_progress_data(projects)
+        self._load_analysis_data(projects)
+        self._load_calendar_data()
+        self._load_workload_data(projects)
+        
+        # 간트 차트 데이터 로드
         self._load_gantt_data(projects)
         
         # 모든 항목 펼치기
-        self._expand_all_items("")
+        self._expand_all_items(self.schedule_sheet.tree)
+        self._expand_all_items(self.progress_sheet.tree)
     
-    def _load_tree_data(self, projects, parent=""):
+    def _load_schedule_data(self, projects):
+        """일정 시트에 데이터 로드"""
+        self._load_tree_data(projects, parent="", tree=self.schedule_sheet.tree)
+    
+    def _load_progress_data(self, projects):
+        """진척 시트에 데이터 로드"""
+        all_tasks = self._flatten_tasks(projects)
+        if isinstance(all_tasks, tuple):
+            all_tasks = all_tasks[0]  # 튜플이면 첫 번째 요소(tasks 리스트)만 사용
+        
+        for task in all_tasks:
+            self.progress_sheet.tree.insert("", "end", values=(
+                task["id"],
+                task["name"],
+                task["start_date"].strftime("%Y-%m-%d"),  # 계획 시작일
+                task["end_date"].strftime("%Y-%m-%d"),    # 계획 종료일
+                task.get("actual_start", "-"),            # 실제 시작일
+                task.get("actual_end", "-"),              # 실제 종료일
+                f"{task['progress']}%",
+                task.get("delay_days", "0"),              # 지연일수
+                task.get("status", "대기중")               # 상태
+            ))
+    
+    def _load_analysis_data(self, projects):
+        """분석 시트에 데이터 로드"""
+        all_tasks = self._flatten_tasks(projects)
+        self.analysis_sheet.update_statistics(all_tasks)
+    
+    def _load_calendar_data(self):
+        """캘린더 시트에 데이터 로드"""
+        # 공휴일 및 특별일정 로드
+        holidays = [
+            ("2024-01-01", "공휴일", "신정"),
+            ("2024-02-09", "공휴일", "설날"),
+            ("2024-03-01", "공휴일", "삼일절"),
+            # ... 추가 일정
+        ]
+        
+        for date, type_, note in holidays:
+            self.calendar_sheet.tree.insert("", "end", values=(date, type_, note))
+    
+    def _load_workload_data(self, projects):
+        """작업부하 시트에 데이터 로드"""
+        all_tasks = self._flatten_tasks(projects)
+        if isinstance(all_tasks, tuple):
+            all_tasks = all_tasks[0]
+        
+        resource_workload = {}
+        
+        for task in all_tasks:
+            # 작업 기간 계산 (종료일 - 시작일)
+            duration = (task["end_date"] - task["start_date"]).days + 1
+            
+            for resource in task.get("resources", []):
+                if resource not in resource_workload:
+                    resource_workload[resource] = {"tasks": 0, "total_hours": 0}
+                resource_workload[resource]["tasks"] += 1
+                resource_workload[resource]["total_hours"] += duration * 8  # 8시간/일 기준
+        
+        # 기존 데이터 삭제
+        for item in self.workload_sheet.tree.get_children():
+            self.workload_sheet.tree.delete(item)
+        
+        # 새 데이터 추가
+        for resource, data in resource_workload.items():
+            available_hours = data["total_hours"] * 1.2  # 예시: 가용시간은 총시간의 120%
+            workload_rate = f"{(data['total_hours']/available_hours*100):.1f}%"
+            
+            self.workload_sheet.tree.insert("", "end", values=(
+                resource,
+                data["tasks"],
+                data["total_hours"],
+                available_hours,
+                workload_rate
+            ))
+    
+    def _load_tree_data(self, projects, parent="", tree=None):
         """트리뷰에 데이터 로드"""
         for project in projects:
-            item_id = self.project_tree.tree.insert(
+            item_id = tree.insert(
                 parent,
                 "end",
                 text=project["name"],
@@ -165,16 +278,48 @@ class GanttApp(ctk.CTk):
                 tags=("project",)
             )
             if "children" in project:
-                self._load_tree_data(project["children"], item_id)
+                self._load_tree_data(project["children"], item_id, tree)
             
             # 점선 스타일 적용
             if parent:
-                self.project_tree.tree.item(item_id, tags=("Dashed",))
+                tree.item(item_id, tags=("Dashed",))
     
-    def _setup_gantt_chart(self):
-        """간트 차트 영역 생성"""
-        gantt_chart = GanttChart(self.main_container)
-        return gantt_chart
+    def _flatten_tasks(self, projects, task_id=1):
+        """프로젝트의 모든 작업을 평면화된 리스트로 변환"""
+        tasks = []
+        for project in projects:
+            task = {
+                "id": f"TASK-{task_id:04d}",
+                "name": project["name"],
+                "start_date": project["start_date"],
+                "end_date": project["end_date"],
+                "progress": project["progress"],
+                "status": project.get("status", "대기중"),
+                "actual_start": project.get("actual_start", None),
+                "actual_end": project.get("actual_end", None),
+                "delay_days": self._calculate_delay(project),
+            }
+            tasks.append(task)
+            task_id += 1
+            
+            if "children" in project:
+                child_tasks = self._flatten_tasks(project["children"], task_id)
+                if isinstance(child_tasks, tuple):
+                    child_tasks, task_id = child_tasks
+                tasks.extend(child_tasks)
+        
+        if task_id == 1:
+            return tasks
+        return tasks, task_id
+    
+    def _calculate_delay(self, task):
+        """작업의 지연일수 계산"""
+        if task.get("actual_end") and task["end_date"]:
+            actual_end = task["actual_end"] if isinstance(task["actual_end"], datetime) else datetime.strptime(task["actual_end"], "%Y-%m-%d")
+            planned_end = task["end_date"]
+            delay = (actual_end - planned_end).days
+            return max(0, delay)
+        return 0
     
     def on_window_resize(self, event):
         if event.widget == self:
@@ -203,67 +348,47 @@ class GanttApp(ctk.CTk):
     def refresh(self):
         """프로그램 새로고침"""
         # 기존 데이터 초기화
-        self.project_tree.tree.delete(*self.project_tree.tree.get_children())
-        self.gantt_chart.canvas.delete("all")
+        for sheet in [self.schedule_sheet, self.progress_sheet, 
+                     self.analysis_sheet, self.calendar_sheet, 
+                     self.workload_sheet]:
+            sheet.tree.delete(*sheet.tree.get_children())
         
         # 데이터 다시 로드
         self._load_data()
         
         # 화면 크기에 맞게 조정
-        self.update_idletasks()  # 화면 업데이트 대기
+        self.update_idletasks()
         
         # 현재 창 크기 가져오기
         current_width = self.winfo_width()
         current_height = self.winfo_height()
         
-        # 프로젝트 목록과 차트 영역 크기 조정
-        project_tree_width = int(current_width * 0.3)
-        gantt_chart_width = current_width - project_tree_width
-        
-        # 프로젝트 트리 크기 조정
-        self.project_tree.frame.configure(width=project_tree_width)
-        self.project_tree.tree.column("#0", width=int(project_tree_width * 0.4))
-        
-        # 각 컬럼 너비 조정
-        remaining_width = project_tree_width * 0.6
-        for col_name, _ in TREE_COLUMNS:
-            col_width = int(remaining_width / len(TREE_COLUMNS))
-            self.project_tree.tree.column(col_name, width=col_width)
-        
-        # 간트 차트 크기 조정
-        self.gantt_chart.frame.configure(
-            width=gantt_chart_width,
-            height=current_height - self.menu_bar.frame.winfo_height()
-        )
-        
-        # 직접 크기 조정 수행
+        # 각 시트의 크기 조정
         self._resize_components()
     
     def _resize_components(self):
-        """프로젝트 목록과 차트 영역의 크기 조정"""
+        """컴포넌트 크기 조정"""
         total_width = self.winfo_width()
         total_height = self.winfo_height()
-        project_tree_width = int(total_width * 0.3)
-        gantt_chart_width = total_width - project_tree_width
         
-        # 프로젝트 목록의 너비 조정
-        self.project_tree.frame.configure(width=project_tree_width)
-        self.project_tree.tree.column("#0", width=int(project_tree_width * 0.4))
-        self.project_tree.tree.column("시작일", width=int(project_tree_width * 0.2))
-        self.project_tree.tree.column("종료일", width=int(project_tree_width * 0.2))
-        self.project_tree.tree.column("진행률", width=int(project_tree_width * 0.2))
+        # 메뉴바를 제외한 높이 계산
+        content_height = total_height - self.menu_bar.frame.winfo_height()
         
-        # 차트 영역의 너비 및 높이 조정
-        self.gantt_chart.frame.configure(
-            width=gantt_chart_width,
-            height=total_height - self.menu_bar.frame.winfo_height()
-        )
+        # 노트북 크기 조정
+        self.notebook.configure(width=total_width, height=content_height)
+        
+        # 각 시트의 프레임 크기 조정
+        for sheet in [self.schedule_sheet, self.progress_sheet, 
+                     self.analysis_sheet, self.calendar_sheet, 
+                     self.workload_sheet]:
+            sheet.frame.configure(width=total_width, height=content_height)
     
     def show_context_menu(self, event):
         """우클릭 메뉴 표시"""
-        item = self.project_tree.tree.identify_row(event.y)
+        tree = event.widget  # 이벤트가 발생한 트리뷰 위젯
+        item = tree.identify_row(event.y)
         if item:
-            self.project_tree.tree.selection_set(item)
+            tree.selection_set(item)
             self.menu_bar.context_menu.post(event.x_root, event.y_root)
     
     def export_to_csv(self):
@@ -288,28 +413,50 @@ class GanttApp(ctk.CTk):
                     "리소스"
                 ])
                 
-                # 데이터 작성
-                self._export_items(writer)
+                # 현재 활성화된 시트의 데이터 내보내기
+                current_tab = self.notebook.select()
+                current_sheet = self.notebook.tab(current_tab, "text")
+                
+                if current_sheet == "일정":
+                    tree = self.schedule_sheet.tree
+                elif current_sheet == "진척":
+                    tree = self.progress_sheet.tree
+                else:
+                    tree = self.schedule_sheet.tree  # 기본값
+                
+                self._export_items(writer, tree=tree)
             
             messagebox.showinfo("알림", "CSV 파일로 내보내기가 완료되었습니다.")
     
-    def _export_items(self, writer, parent=""):
+    def _export_items(self, writer, parent="", tree=None):
         """재귀적으로 모든 항목 내보내기"""
-        for item in self.project_tree.tree.get_children(parent):
-            values = self.project_tree.tree.item(item)['values']
+        for item in tree.get_children(parent):
+            values = tree.item(item)['values']
             writer.writerow([
                 item,  # 작업ID
-                self.project_tree.tree.item(item)['text'],  # 작업명
+                tree.item(item)['text'],  # 작업명
                 *values  # 나머지 값들
             ])
-            self._export_items(writer, item)
+            self._export_items(writer, item, tree)
     
     def add_task(self):
         """작업 추가"""
+        # 현재 활성화된 시트의 트리뷰 가져오기
+        current_tab = self.notebook.select()
+        current_sheet = self.notebook.tab(current_tab, "text")
+        
+        if current_sheet == "일정":
+            tree = self.schedule_sheet.tree
+        elif current_sheet == "진척":
+            tree = self.progress_sheet.tree
+        else:
+            messagebox.showwarning("경고", "일정 또는 진척 탭에서만 작업을 추가할 수 있습니다.")
+            return
+        
         dialog = TaskDialog(self)
         self.wait_window(dialog)
         if hasattr(dialog, 'result') and dialog.result:
-            self.project_tree.tree.insert(
+            tree.insert(
                 "",
                 "end",
                 text=dialog.result["name"],
@@ -327,13 +474,25 @@ class GanttApp(ctk.CTk):
     
     def edit_task(self):
         """작업 수정"""
-        selected = self.project_tree.tree.selection()
+        # 현재 활성화된 시트의 트리뷰 가져오기
+        current_tab = self.notebook.select()
+        current_sheet = self.notebook.tab(current_tab, "text")
+        
+        if current_sheet == "일정":
+            tree = self.schedule_sheet.tree
+        elif current_sheet == "진척":
+            tree = self.progress_sheet.tree
+        else:
+            messagebox.showwarning("경고", "일정 또는 진척 탭에서만 작업을 수정할 수 있습니다.")
+            return
+        
+        selected = tree.selection()
         if not selected:
             messagebox.showwarning("경고", "수정할 작업을 선택해주세요.")
             return
-            
+        
         item = selected[0]
-        current_values = self.project_tree.tree.item(item)
+        current_values = tree.item(item)
         
         dialog = TaskDialog(
             self,
@@ -343,7 +502,7 @@ class GanttApp(ctk.CTk):
         self.wait_window(dialog)
         
         if hasattr(dialog, 'result') and dialog.result:
-            self.project_tree.tree.item(
+            tree.item(
                 item,
                 text=dialog.result["name"],
                 values=(
@@ -359,18 +518,42 @@ class GanttApp(ctk.CTk):
     
     def delete_task(self):
         """작업 삭제"""
-        selected = self.project_tree.tree.selection()
+        # 현재 활성화된 시트의 트리뷰 가져오기
+        current_tab = self.notebook.select()
+        current_sheet = self.notebook.tab(current_tab, "text")
+        
+        if current_sheet == "일정":
+            tree = self.schedule_sheet.tree
+        elif current_sheet == "진척":
+            tree = self.progress_sheet.tree
+        else:
+            messagebox.showwarning("경고", "일정 또는 진척 탭에서만 작업을 삭제할 수 있습니다.")
+            return
+        
+        selected = tree.selection()
         if not selected:
             messagebox.showwarning("경고", "삭제할 작업을 선택해주세요.")
             return
-            
+        
         if messagebox.askyesno("확인", "선택한 작업을 삭제하시겠습니까?"):
             for item in selected:
-                self.project_tree.tree.delete(item)
+                tree.delete(item)
     
     def add_subtask(self):
         """하위 작업 추가"""
-        selected = self.project_tree.tree.selection()
+        # 현재 활성화된 시트의 트리뷰 가져오기
+        current_tab = self.notebook.select()
+        current_sheet = self.notebook.tab(current_tab, "text")
+        
+        if current_sheet == "일정":
+            tree = self.schedule_sheet.tree
+        elif current_sheet == "진척":
+            tree = self.progress_sheet.tree
+        else:
+            messagebox.showwarning("경고", "일정 또는 진척 탭에서만 하위 작업을 추가할 수 있습니다.")
+            return
+        
+        selected = tree.selection()
         if not selected:
             messagebox.showwarning("경고", "상위 작업을 선택해주세요.")
             return
@@ -380,7 +563,7 @@ class GanttApp(ctk.CTk):
         self.wait_window(dialog)
         
         if hasattr(dialog, 'result') and dialog.result:
-            self.project_tree.tree.insert(
+            tree.insert(
                 parent_item,  # 선택된 항목의 하위로 추가
                 "end",
                 text=dialog.result["name"],
@@ -403,28 +586,53 @@ class GanttApp(ctk.CTk):
     def generate_report(self): pass
 
     def move_task_up(self):
-        selected = self.project_tree.tree.selection()
+        # 현재 활성화된 시트의 트리뷰 가져오기
+        current_tab = self.notebook.select()
+        current_sheet = self.notebook.tab(current_tab, "text")
+        
+        if current_sheet == "일정":
+            tree = self.schedule_sheet.tree
+        elif current_sheet == "진척":
+            tree = self.progress_sheet.tree
+        else:
+            return
+        
+        selected = tree.selection()
         if not selected:
             return
         
         item = selected[0]
-        prev = self.project_tree.tree.prev(item)
+        prev = tree.prev(item)
         if prev:
-            self._swap_items(item, prev)
+            self._swap_items(tree, item, prev)
 
     def move_task_down(self):
-        selected = self.project_tree.tree.selection()
+        # 현재 활성화된 시트의 트리뷰 가져오기
+        current_tab = self.notebook.select()
+        current_sheet = self.notebook.tab(current_tab, "text")
+        
+        if current_sheet == "일정":
+            tree = self.schedule_sheet.tree
+        elif current_sheet == "진척":
+            tree = self.progress_sheet.tree
+        else:
+            return
+        
+        selected = tree.selection()
         if not selected:
             return
         
         item = selected[0]
-        next = self.project_tree.tree.next(item)
+        next = tree.next(item)
         if next:
-            self._swap_items(item, next)
+            self._swap_items(tree, item, next)
 
-    def _swap_items(self, item1, item2):
-        # 아이템 위치 교환 로직
-        pass
+    def _swap_items(self, tree, item1, item2):
+        """아이템 위치 교환 로직"""
+        item1_values = tree.item(item1, "values")
+        item2_values = tree.item(item2, "values")
+        tree.item(item1, values=item2_values)
+        tree.item(item2, values=item1_values)
 
     def show_filters(self):
         dialog = FilterDialog(self)
@@ -441,34 +649,6 @@ class GanttApp(ctk.CTk):
     def toggle_timeline(self):
         # 타임라인 표시/숨기기
         pass
-
-    def _load_gantt_data(self, projects):
-        """간트 차트에 데이터 로드"""
-        # 모든 작업을 평면화된 리스트로 변환
-        all_tasks = self._flatten_tasks(projects)
-        
-        if all_tasks:
-            # 시작일과 종료일 설정
-            start_date = min(task["start_date"] for task in all_tasks)
-            end_date = max(task["end_date"] for task in all_tasks)
-            
-            # 간트 차트 초기화 및 그리기
-            self.gantt_chart.set_date_range(start_date, end_date)
-            self.gantt_chart.draw(all_tasks)
-
-    def _flatten_tasks(self, projects):
-        """프로젝트의 모든 작업을 평면화된 리스트로 변환"""
-        tasks = []
-        for project in projects:
-            tasks.append({
-                "name": project["name"],
-                "start_date": project["start_date"],
-                "end_date": project["end_date"],
-                "progress": project["progress"]
-            })
-            if "children" in project:
-                tasks.extend(self._flatten_tasks(project["children"]))
-        return tasks
 
     def _configure_tags(self):
         """트리뷰 항목의 태그 설정"""
@@ -489,12 +669,43 @@ class GanttApp(ctk.CTk):
             background=COLORS['secondary']
         )
 
-    def _expand_all_items(self, parent_item):
+    def _expand_all_items(self, tree, parent_item=""):
         """재귀적으로 모든 트리뷰 항목 펼치기"""
-        self.project_tree.tree.item(parent_item, open=True)  # 현재 항목 펼치기
-        for child in self.project_tree.tree.get_children(parent_item):
-            self._expand_all_items(child)  # 재귀적으로 자식 항목들도 펼치기
+        tree.item(parent_item, open=True)  # 현재 항목 펼치기
+        for child in tree.get_children(parent_item):
+            self._expand_all_items(tree, child)  # 재귀적으로 자식 항목들도 펼치기
+
+    def _load_gantt_data(self, projects):
+        """간트 차트에 데이터 로드"""
+        all_tasks = self._flatten_tasks(projects)
+        
+        if all_tasks:
+            # 시작일과 종료일 설정
+            start_date = min(task["start_date"] for task in all_tasks)
+            end_date = max(task["end_date"] for task in all_tasks)
+            
+            # 간트 차트 초기화 및 그리기
+            self.gantt_chart.set_date_range(start_date, end_date)
+            self.gantt_chart.draw(all_tasks)
 
 if __name__ == "__main__":
-    app = GanttApp()
-    app.mainloop() 
+    # root 윈도우 생성 및 설정
+    root = ctk.CTk()
+    root.withdraw()  # 메인 윈도우 숨기기
+    
+    # 화면 중앙에 위치시키기 위한 업데이트
+    root.update_idletasks()
+    
+    # 로그인 다이얼로그 표시
+    login = LoginDialog(root)
+    
+    # 로그인 창이 닫힐 때까지 대기
+    root.wait_window(login)
+    
+    # 로그인 성공 시에만 메인 앱 실행
+    if hasattr(login, 'result') and login.result:
+        root.destroy()  # 숨겨진 root 창 제거
+        app = GanttApp()
+        app.mainloop()
+    else:
+        root.destroy()  # 로그인 실패 시 종료 

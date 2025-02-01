@@ -1,4 +1,5 @@
 from typing import Dict
+from enum import Enum
 
 # 색상 테마
 COLORS: Dict[str, str] = {
@@ -92,4 +93,62 @@ CONTEXT_MENU_ITEMS = [
     ("---", None),
     ("CSV 내보내기", "export_to_csv"),
     ("MS Project 내보내기", "export_to_mpp")
+]
+
+# 시트 타입 정의
+class SheetType(Enum):
+    SCHEDULE = "schedule"
+    PROGRESS = "progress" 
+    ANALYSIS = "analysis"
+    CALENDAR = "calendar"
+    WORKLOAD = "workload"
+
+# 각 시트별 컬럼 정의
+SCHEDULE_COLUMNS = [
+    ("작업ID", 100),
+    ("작업명", 200),
+    ("시작일", 100),
+    ("종료일", 100),
+    ("기간", 80),
+    ("진행률", 80),
+    ("담당자", 100),
+    ("우선순위", 80),
+    ("상태", 80),
+    ("리소스", 150)
+]
+
+PROGRESS_COLUMNS = [
+    ("작업ID", 100),
+    ("작업명", 200),
+    ("계획시작일", 100),
+    ("계획종료일", 100),
+    ("실제시작일", 100),
+    ("실제종료일", 100),
+    ("진행률", 80),
+    ("지연일수", 80),
+    ("상태", 80)
+]
+
+ANALYSIS_COLUMNS = [
+    ("구분", 100),
+    ("전체", 80),
+    ("완료", 80),
+    ("진행중", 80),
+    ("지연", 80),
+    ("예정", 80),
+    ("달성률", 80)
+]
+
+CALENDAR_COLUMNS = [
+    ("날짜", 100),
+    ("구분", 80),
+    ("비고", 200)
+]
+
+WORKLOAD_COLUMNS = [
+    ("리소스", 100),
+    ("작업수", 80),
+    ("총시간", 80),
+    ("가용시간", 80),
+    ("부하율", 80)
 ] 
