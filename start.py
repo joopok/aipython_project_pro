@@ -12,13 +12,17 @@ from dialogs import TaskDialog, SettingsDialog, FilterDialog
 from constants import COLORS, WINDOW_MIN_SIZE, WINDOW_SIZE_RATIO, TREE_COLUMNS
 from ui_components import ProjectTreeView, MenuBar
 from sheets import ScheduleSheet, ProgressSheet, AnalysisSheet, CalendarSheet, WorkloadSheet
-from login_dialog import LoginDialog
+import sys
+from session import session, SessionManager  # SessionManager 추가
+
+# 전역 세션 매니저 인스턴스
+session = SessionManager()
 
 class GanttApp(ctk.CTk):
-    def __init__(self):
+    def __init__(self, user_info=None):
         super().__init__()
         
-        # 로그인 검증 부분 제거
+        self.user_info = user_info
         self._load_fonts()  # 글꼴 로드 추가
         self._setup_window()
         self._setup_styles()
@@ -33,6 +37,7 @@ class GanttApp(ctk.CTk):
             self.option_add("*Font", self.default_font)
     
     def _setup_window(self):
+        """창 설정 및 중앙 배치"""
         self.title("프로젝트 Pro")
         self.configure(fg_color=COLORS['background'])
         
@@ -40,28 +45,25 @@ class GanttApp(ctk.CTk):
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
         
-        # 창 크기 설정
-        window_width = int(screen_width * WINDOW_SIZE_RATIO)
-        window_height = int(screen_height * WINDOW_SIZE_RATIO)
+        # 창 크기 설정 (화면의 80%)
+        window_width = int(screen_width)
+        window_height = int(screen_height)
         
         # 최소 크기 설정
         min_width, min_height = WINDOW_MIN_SIZE
         window_width = max(window_width, min_width)
         window_height = max(window_height, min_height)
         
-        # 창 위치 설정
+        # 창 위치 계산 (화면 중앙)
         x = (screen_width - window_width) // 2
         y = (screen_height - window_height) // 2
         
+        # 창 크기와 위치 설정
         self.geometry(f"{window_width}x{window_height}+{x}+{y}")
         self.minsize(min_width, min_height)
         
         # 창 최대화
-        self.after(0, self._maximize_window)
-    
-    def _maximize_window(self):
-        """창을 최대화"""
-        self.state('zoomed')
+        self.after(100, lambda: self.state('zoomed'))
     
     def _setup_styles(self):
         ctk.set_appearance_mode("light")
@@ -89,17 +91,56 @@ class GanttApp(ctk.CTk):
         )
     
     def _init_ui(self):
-        self._setup_main_container()
+        """UI 초기화"""
+        print(f"1세션 정보:{session.get_session_id()}")
+        print(f"1사용자 ID: {session.get_user_id()}")
+        print(f"1사용자 이름: {session.get_user_name()}")
+        print(f"1로그인 시간: {session._session_data['login_time']}")
+        print(f"1사용자 레벨: {session._session_data['user_level']}")
+        print(f"1인증 상태: {session.is_authenticated()}")
+        
+        # 메인 컨테이너 프레임 설정
+        self.main_container = ctk.CTkFrame(self, fg_color="transparent")
+        self.main_container.grid(row=0, column=0, sticky="nsew")
+        
+        # style 초기화를 먼저 수행
         self.style = ttk.Style()
         self.style.theme_use('clam')
         self._configure_treeview_style(self.style)
+        
+        # 사용자 정보 표시
+        user_info_frame = ctk.CTkFrame(self.main_container, fg_color="transparent")
+        user_info_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=5)
+        
+        user_id_label = ctk.CTkLabel(
+            user_info_frame,
+            text=f"사용자 ID: {session.get_user_id()}",
+            font=('Noto Sans KR', 12),
+            text_color=COLORS['text']
+        )
+        user_id_label.pack(side=tk.RIGHT, padx=5)
+        
+        user_name_label = ctk.CTkLabel(
+            user_info_frame,
+            text=f"사용자명: {session.get_user_name()}",
+            font=('Noto Sans KR', 12),
+            text_color=COLORS['text']
+        )
+        user_name_label.pack(side=tk.RIGHT, padx=5)
+        
+        # 프로젝트 트리뷰 생성
+        self.project_tree = ProjectTreeView(self.main_container, style=self.style)
+        self.project_tree.frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+        
+        # 나머지 UI 초기화 코드
+        self._setup_main_container()
         
         # 메뉴바 생성
         self.menu_bar = MenuBar(self.main_container, self)
         
         # 노트북(탭) 생성
         self.notebook = ttk.Notebook(self.main_container)
-        self.notebook.grid(row=1, column=0, sticky="nsew")
+        self.notebook.grid(row=2, column=0, sticky="nsew")
         
         # 각 시트 생성
         self.schedule_sheet = ScheduleSheet(self.notebook)
@@ -117,24 +158,14 @@ class GanttApp(ctk.CTk):
         
         # 간트 차트 생성 및 추가
         self.gantt_chart = GanttChart(self.main_container)
-        self.gantt_chart.frame.grid(row=2, column=0, sticky="nsew")
+        self.gantt_chart.frame.grid(row=3, column=0, sticky="nsew")
         
         self._bind_events()
     
     def _setup_main_container(self):
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(0, weight=1)
-        
-        self.main_container = ctk.CTkFrame(
-            self,
-            fg_color=COLORS['background'],
-            corner_radius=15
-        )
-        self.main_container.grid(
-            row=0, column=0,
-            sticky="nsew",
-            padx=20, pady=20
-        )
+        """메인 컨테이너 설정"""
+        self.main_container.grid_rowconfigure(1, weight=1)
+        self.main_container.grid_columnconfigure(0, weight=1)
     
     def _setup_layout(self):
         self.menu_bar.frame.grid(
@@ -679,33 +710,37 @@ class GanttApp(ctk.CTk):
         """간트 차트에 데이터 로드"""
         all_tasks = self._flatten_tasks(projects)
         
-        if all_tasks:
-            # 시작일과 종료일 설정
-            start_date = min(task["start_date"] for task in all_tasks)
-            end_date = max(task["end_date"] for task in all_tasks)
-            
-            # 간트 차트 초기화 및 그리기
-            self.gantt_chart.set_date_range(start_date, end_date)
-            self.gantt_chart.draw(all_tasks)
+        # all_tasks가 튜플인 경우 첫 번째 요소 사용
+        if isinstance(all_tasks, tuple):
+            all_tasks = all_tasks[0]
+        
+        if all_tasks and isinstance(all_tasks, list) and len(all_tasks) > 0:
+            try:
+                # 시작일과 종료일 설정
+                start_date = min(task.get("start_date") for task in all_tasks if task.get("start_date"))
+                end_date = max(task.get("end_date") for task in all_tasks if task.get("end_date"))
+                
+                # 간트 차트 초기화 및 그리기
+                self.gantt_chart.set_date_range(start_date, end_date)
+                self.gantt_chart.draw(all_tasks)
+            except (TypeError, ValueError) as e:
+                print(f"간트 차트 데이터 로드 중 오류 발생: {e}")
 
 if __name__ == "__main__":
-    # root 윈도우 생성 및 설정
-    root = ctk.CTk()
-    root.withdraw()  # 메인 윈도우 숨기기
-    
-    # 화면 중앙에 위치시키기 위한 업데이트
-    root.update_idletasks()
-    
-    # 로그인 다이얼로그 표시
-    login = LoginDialog(root)
-    
-    # 로그인 창이 닫힐 때까지 대기
-    root.wait_window(login)
-    
-    # 로그인 성공 시에만 메인 앱 실행
-    if hasattr(login, 'result') and login.result:
-        root.destroy()  # 숨겨진 root 창 제거
+    try:
+        # 세션 정보 불러오기
+        if not session.load_session_from_file():
+            messagebox.showerror("오류", "세션 정보를 찾을 수 없습니다. 다시 로그인해주세요.")
+            sys.exit(1)
+            
+        if not session.is_authenticated():
+            messagebox.showerror("오류", "로그인이 필요합니다.")
+            sys.exit(1)
+            
+        # 메인 앱 실행
         app = GanttApp()
         app.mainloop()
-    else:
-        root.destroy()  # 로그인 실패 시 종료 
+                    
+    except Exception as e:
+        print(f"오류 발생: {e}")
+        sys.exit(1)
