@@ -1,0 +1,374 @@
+/* 주문 관리 페이지 전용 스타일 */
+
+        /* 테이블 컨테이너 */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        /* 엑셀 스타일 테이블 */
+        .excel-table-wrapper {
+            overflow-x: auto;
+            max-height: calc(100vh - 250px);
+            position: relative;
+        }
+
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 2000px;
+        }
+
+        .excel-table thead {
+            background-color: #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .excel-table th {
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: 600;
+            color: #2d3748;
+            border: 1px solid #cbd5e0;
+            white-space: nowrap;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .excel-table td {
+            padding: 10px 8px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            color: #4a5568;
+            background: white;
+        }
+
+        .excel-table tbody tr:nth-child(even) {
+            background-color: #f7fafc;
+        }
+
+        .excel-table tbody tr:hover {
+            background-color: #edf2f7;
+        }
+
+        /* 컬럼 너비 */
+        .col-order-no { width: 80px; }
+        .col-platform { width: 120px; }
+        .col-company { width: 150px; }
+        .col-weight { width: 80px; }
+        .col-box-count { width: 80px; }
+        .col-order-date { width: 100px; }
+        .col-total { width: 80px; }
+        .col-unit { width: 80px; }
+        .col-status { width: 120px; }
+        .col-tracking { width: 180px; }
+        .col-forward-no { width: 120px; }
+        .col-forward-name { width: 180px; }
+        .col-addr1 { width: 80px; }
+        .col-addr2 { width: 80px; }
+        .col-memo { width: 200px; }
+        .col-product { width: 300px; }
+        .col-qty { width: 60px; }
+        .col-price { width: 100px; }
+        .col-hscode { width: 100px; }
+
+        /* 플랫폼 뱃지 */
+        .platform-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .platform-badge.naver {
+            background: #03c75a;
+            color: white;
+        }
+
+        .platform-badge.coupang {
+            background: #c7004c;
+            color: white;
+        }
+
+        /* 테이블 헤더 액션 */
+        .table-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .action-btn:hover {
+            border-color: #cbd5e0;
+            background-color: #f7fafc;
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+
+        .action-btn.primary:hover {
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .action-btn.excel {
+            background: #217346;
+            color: white;
+            border: none;
+        }
+
+        .action-btn.excel:hover {
+            background: #1e5e3a;
+        }
+
+        /* 검색 필터 영역 */
+        .filter-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            color: #4a5568;
+            font-weight: 500;
+            min-width: 60px;
+        }
+
+        .filter-input {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .date-input {
+            width: 150px;
+        }
+
+        .search-btn {
+            padding: 8px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            transform: translateY(-1px);
+        }
+
+        /* 페이지네이션 */
+        .table-pagination {
+            padding: 20px 24px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .page-btn {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 36px;
+            text-align: center;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            border-color: #cbd5e0;
+            background-color: #f7fafc;
+        }
+
+        .page-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 다크 모드 - 주문 관리 페이지 전용 스타일 */
+
+body[data-theme="dark"] .filter-section {
+    background: #2d3748;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+body[data-theme="dark"] .filter-label {
+    color: #a0aec0;
+}
+
+body[data-theme="dark"] .filter-input,
+body[data-theme="dark"] .filter-select {
+    background: #4a5568;
+    border-color: #667eea;
+    color: #e2e8f0;
+}
+
+body[data-theme="dark"] .filter-input:focus,
+body[data-theme="dark"] .filter-select:focus {
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+body[data-theme="dark"] .table-container {
+    background: #2d3748;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+body[data-theme="dark"] .excel-table thead {
+    background-color: #4a5568;
+}
+
+body[data-theme="dark"] .excel-table th {
+    color: #e2e8f0;
+    border: 1px solid #667eea;
+}
+
+body[data-theme="dark"] .excel-table td {
+    border: 1px solid #4a5568;
+    color: #e2e8f0;
+    background: #2d3748;
+}
+
+body[data-theme="dark"] .excel-table tbody tr:nth-child(even) {
+    background-color: #4a5568;
+}
+
+body[data-theme="dark"] .excel-table tbody tr:hover {
+    background-color: #667eea;
+}
+
+body[data-theme="dark"] .platform-badge.naver {
+    background: rgba(3, 199, 90, 0.2);
+}
+
+body[data-theme="dark"] .platform-badge.coupang {
+    background: rgba(199, 0, 76, 0.2);
+}
+
+body[data-theme="dark"] .action-btn {
+    border: 1px solid #4a5568;
+    background: #2d3748;
+    color: #e2e8f0;
+}
+
+body[data-theme="dark"] .action-btn:hover {
+    border-color: #667eea;
+    background-color: #4a5568;
+}
+
+body[data-theme="dark"] .table-pagination {
+    border-top: 1px solid #4a5568;
+}
+
+body[data-theme="dark"] .pagination-info {
+    color: #a0aec0;
+}
+
+body[data-theme="dark"] .page-btn {
+    border: 1px solid #4a5568;
+    background: #2d3748;
+    color: #e2e8f0;
+}
+
+body[data-theme="dark"] .page-btn:hover:not(:disabled) {
+    border-color: #667eea;
+    background-color: #4a5568;
+}
+
+
+/* 반응형 - 주문 관리 페이지 전용 */
+        @media (max-width: 768px) {
+
+            .filter-row {
+                flex-wrap: wrap;
+            }
+
+            .excel-table {
+                font-size: 11px;
+            }
+        }
+    

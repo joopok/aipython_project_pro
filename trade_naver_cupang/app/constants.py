@@ -1,0 +1,30 @@
+# 페이지네이션 설정
+DEFAULT_PAGE = 1
+DEFAULT_PER_PAGE = 20
+MAX_SEARCH_HISTORY = 50
+
+# 로깅 설정
+LOG_FILE_MAX_BYTES = 10240  # 10KB
+LOG_FILE_BACKUP_COUNT = 10
+LOG_FILE_NAME = 'logs/app.log'
+
+# 세션 키
+SESSION_USER_ID = 'user_id'
+SESSION_USERNAME = 'username'
+SESSION_USER_ROLE = 'role'
+SESSION_USER_FULLNAME = 'user_fullname'
+
+# HTTP 상태 코드
+HTTP_OK = 200
+HTTP_BAD_REQUEST = 400
+HTTP_UNAUTHORIZED = 401
+HTTP_INTERNAL_ERROR = 500
+
+# 사용자 역할
+ROLE_ADMIN = 'admin'
+ROLE_USER = 'user'
+
+# 플랫폼 타입
+PLATFORM_NAVER = 'naver'
+PLATFORM_COUPANG = 'coupang'
+PLATFORM_ALL = 'all'

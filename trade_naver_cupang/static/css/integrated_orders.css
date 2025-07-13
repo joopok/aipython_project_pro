@@ -1,0 +1,651 @@
+/* 통합 주문조회 페이지 스타일 */
+
+/* 페이지 헤더 */
+.page-header {
+    margin-bottom: 32px;
+}
+
+.page-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0 0 8px 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-description {
+    font-size: 16px;
+    color: #718096;
+    margin: 0;
+}
+
+/* 필터 섹션 */
+.filter-section {
+    background-color: #fff;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 24px;
+}
+
+.filter-row {
+    display: flex;
+    gap: 20px;
+    align-items: flex-end;
+    justify-content: space-between;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.filter-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+.date-range {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.date-separator {
+    color: #718096;
+    font-weight: 500;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #2d3748;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+/* 필터 섹션의 form-control 스타일 추가 */
+.filter-group .form-control {
+    min-width: 150px;
+}
+
+/* 플랫폼 필드 크기 조정 */
+.filter-group:nth-child(2) {
+    flex: 0.6;
+}
+
+.filter-group:nth-child(2) .form-control {
+    min-width: 100px;
+}
+
+/* 주문상태 필드 크기 조정 */
+.filter-group:nth-child(3) {
+    flex: 0.7;
+}
+
+.filter-group:nth-child(3) .form-control {
+    min-width: 120px;
+}
+
+/* 검색 필드 크기 조정 */
+.filter-group:nth-child(4) {
+    flex: 1.2;
+}
+
+.filter-group:nth-child(4) .form-control {
+    min-width: 200px;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-control[readonly] {
+    background: #f7fafc;
+    cursor: not-allowed;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    flex-shrink: 0;
+}
+
+.filter-actions .btn {
+    padding: 12px 30px;
+    font-size: 15px;
+    font-weight: 600;
+    min-width: 100px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 통계 섹션 */
+.stats-section {
+    margin-bottom: 24px;
+}
+
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.stat-card {
+    background-color: #fff;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+
+.stat-card.total .stat-icon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.stat-card.new .stat-icon {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+}
+
+.stat-card.delivering .stat-icon {
+    background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+}
+
+.stat-card.revenue .stat-icon {
+    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #718096;
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 8px;
+}
+
+.stat-detail {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.platform-stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #4a5568;
+}
+
+.platform-logo {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 12px;
+    color: #fff;
+}
+
+.platform-stat.naver .platform-logo {
+    background-color: #03c75a;
+}
+
+.platform-stat.coupang .platform-logo {
+    background-color: #e53e3e;
+}
+
+/* 테이블 컨테이너 */
+.table-container {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.table-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.table-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0;
+}
+
+.result-count {
+    font-size: 14px;
+    color: #718096;
+    margin-left: 12px;
+}
+
+.table-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background-color: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #4a5568;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    background-color: #f7fafc;
+    border-color: #667eea;
+    color: #667eea;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.action-btn.excel {
+    background-color: #48bb78;
+    color: #fff;
+    border-color: #48bb78;
+}
+
+.action-btn.excel:hover {
+    background-color: #38a169;
+    border-color: #38a169;
+}
+
+/* 엑셀 스타일 테이블 */
+.excel-table-wrapper {
+    overflow-x: auto;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.excel-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.excel-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.excel-table th {
+    background-color: #f7fafc;
+    padding: 12px 8px;
+    border: 1px solid #e2e8f0;
+    font-weight: 600;
+    color: #4a5568;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.excel-table td {
+    padding: 12px 8px;
+    border: 1px solid #e2e8f0;
+    color: #2d3748;
+}
+
+.excel-table tr:nth-child(even) {
+    background-color: #f7fafc;
+}
+
+.excel-table tr:hover {
+    background-color: #edf2f7;
+}
+
+/* 컬럼 너비 */
+.col-platform { width: 80px; text-align: center; }
+.col-date { width: 140px; }
+.col-order-id { width: 120px; }
+.col-platform-order { width: 120px; }
+.col-product { width: 250px; }
+.col-qty { width: 60px; text-align: center; }
+.col-orderer { width: 100px; }
+.col-receiver { width: 100px; }
+.col-amount { width: 100px; text-align: right; }
+.col-status { width: 100px; }
+.col-company { width: 100px; }
+.col-tracking { width: 120px; }
+.col-address { width: 200px; }
+
+/* 플랫폼 배지 */
+.platform-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.platform-badge.naver {
+    background-color: #d6f5e0;
+    color: #03c75a;
+}
+
+.platform-badge.coupang {
+    background-color: #fed7d7;
+    color: #e53e3e;
+}
+
+/* 주문 상태 배지 */
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-badge.payment_waiting {
+    background-color: #e2e8f0;
+    color: #4a5568;
+}
+
+.status-badge.accept {
+    background-color: #bee3f8;
+    color: #2b6cb0;
+}
+
+.status-badge.instruct {
+    background-color: #fbd38d;
+    color: #975a16;
+}
+
+.status-badge.departure {
+    background-color: #d6f5d6;
+    color: #276749;
+}
+
+.status-badge.delivering {
+    background-color: #fed7d7;
+    color: #9b2c2c;
+}
+
+.status-badge.final_delivery {
+    background-color: #c6f6d5;
+    color: #22543d;
+}
+
+/* 빈 상태 */
+.table-empty {
+    padding: 80px 20px;
+    text-align: center;
+    color: #a0aec0;
+}
+
+.table-empty svg {
+    margin-bottom: 16px;
+}
+
+.table-empty p {
+    font-size: 16px;
+    margin: 0;
+}
+
+/* 페이지네이션 */
+.table-pagination {
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #e2e8f0;
+}
+
+.pagination-info {
+    font-size: 14px;
+    color: #718096;
+}
+
+.pagination-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.pagination-btn {
+    padding: 6px 12px;
+    border: 1px solid #e2e8f0;
+    background-color: #fff;
+    border-radius: 6px;
+    color: #4a5568;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background-color: #f7fafc;
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    border-color: transparent;
+}
+
+/* 버튼 */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+.btn-secondary {
+    background-color: #e2e8f0;
+    color: #4a5568;
+}
+
+.btn-secondary:hover {
+    background-color: #cbd5e0;
+}
+
+/* 로딩 오버레이 */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 20px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-message {
+    font-size: 16px;
+    color: #4a5568;
+}
+
+/* 다크 모드 */
+body[data-theme="dark"] .page-title {
+    color: #f7fafc;
+}
+
+body[data-theme="dark"] .page-description {
+    color: #a0aec0;
+}
+
+body[data-theme="dark"] .filter-section,
+body[data-theme="dark"] .stat-card,
+body[data-theme="dark"] .table-container {
+    background-color: #2d3748;
+}
+
+body[data-theme="dark"] .filter-group label,
+body[data-theme="dark"] .stat-label,
+body[data-theme="dark"] .result-count,
+body[data-theme="dark"] .pagination-info {
+    color: #a0aec0;
+}
+
+body[data-theme="dark"] .table-title,
+body[data-theme="dark"] .stat-value {
+    color: #f7fafc;
+}
+
+body[data-theme="dark"] .form-control,
+body[data-theme="dark"] .action-btn,
+body[data-theme="dark"] .pagination-btn {
+    background-color: #2d3748;
+    border-color: #4a5568;
+    color: #e2e8f0;
+}
+
+body[data-theme="dark"] .excel-table th {
+    background-color: #1a202c;
+    border-color: #4a5568;
+    color: #a0aec0;
+}
+
+body[data-theme="dark"] .excel-table td {
+    border-color: #4a5568;
+    color: #e2e8f0;
+}
+
+body[data-theme="dark"] .excel-table tr:nth-child(even) {
+    background-color: #374151;
+}
+
+body[data-theme="dark"] .excel-table tr:hover {
+    background-color: #4a5568;
+}
+
+body[data-theme="dark"] .table-header,
+body[data-theme="dark"] .table-pagination {
+    border-color: #4a5568;
+}
+
+/* 반응형 */
+@media (max-width: 1200px) {
+    .filter-row {
+        flex-wrap: wrap;
+    }
+    
+    .filter-group {
+        flex: 1 1 200px;
+    }
+    
+    .filter-actions {
+        flex: 1 1 100%;
+        justify-content: flex-end;
+        margin-top: 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .table-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+    }
+    
+    .excel-table-wrapper {
+        overflow-x: scroll;
+    }
+}

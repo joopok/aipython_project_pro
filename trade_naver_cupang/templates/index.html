@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>네이버/쿠팡 상품 검색</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>네이버/쿠팡 상품 검색</h1>
+        
+        <form class="search-form" id="searchForm">
+            <input type="text" id="keyword" placeholder="검색어를 입력하세요" required>
+            <select id="platform">
+                <option value="all">전체</option>
+                <option value="naver">네이버</option>
+                <option value="coupang">쿠팡</option>
+            </select>
+            <button type="submit">검색</button>
+        </form>
+        
+        <div class="error" id="error"></div>
+        <div class="loading" id="loading">검색 중...</div>
+        <div class="results" id="results"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+</body>
+</html>

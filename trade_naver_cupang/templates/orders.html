@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiFlow - 주문내역조회</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/common_sidebar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/orders.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/spinner.css') }}">
+</head>
+<body data-theme="light">
+    {% include 'includes/sidebar.html' %}
+
+    <!-- 메인 컨텐츠 -->
+    <main class="main-content" id="mainContent">
+        {% include 'includes/header.html' %}
+
+        <!-- 컨텐츠 -->
+        <div class="content">
+            <!-- 검색 필터 -->
+            <div class="filter-section">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="filter-label">날짜</label>
+                        <input type="date" class="filter-input date-input" id="startDate" value="2025-07-01">
+                        <span>~</span>
+                        <input type="date" class="filter-input date-input" id="endDate" value="2025-07-10">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">플랫폼</label>
+                        <select class="filter-select" id="platformFilter">
+                            <option value="">전체</option>
+                            <option value="naver">네이버</option>
+                            <option value="coupang">쿠팡</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">상태</label>
+                        <select class="filter-select" id="statusFilter">
+                            <option value="">전체</option>
+                            <option value="pending">처리대기</option>
+                            <option value="processing">처리중</option>
+                            <option value="completed">완료</option>
+                            <option value="cancelled">취소</option>
+                        </select>
+                    </div>
+                    <button class="search-btn" onclick="searchOrders()">검색</button>
+                </div>
+            </div>
+
+            <!-- 테이블 -->
+            <div class="table-container">
+                <div class="table-header">
+                    <div class="table-actions">
+                        <button class="action-btn excel">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M12,10L8,15H10.5V19H13.5V15H16L12,10Z"/>
+                            </svg>
+                            엑셀 다운로드
+                        </button>
+                        <button class="action-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M14,12H19.5L14,6.5V12M8,5H15L21,11V19A2,2 0 0,1 19,21H8C6.89,21 6,20.1 6,19V18H11V12.5L7.5,16H2V9.5L5.5,13H11V7H6V5M13.5,3H4V16H6V14H11V16H13.5V3Z"/>
+                            </svg>
+                            엑셀 업로드
+                        </button>
+                        <button class="action-btn primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19,13H5V11H19V13Z"/>
+                            </svg>
+                            미국 물류사 전송
+                        </button>
+                    </div>
+                </div>
+
+                <div class="excel-table-wrapper">
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th class="col-order-no">번호</th>
+                                <th class="col-platform">보내는업체</th>
+                                <th class="col-company">도시람이자</th>
+                                <th class="col-weight">무게(LB)</th>
+                                <th class="col-box-count">박스갯수</th>
+                                <th class="col-order-date">주문번호</th>
+                                <th class="col-total">류 (목록:1,</th>
+                                <th class="col-unit">분 (개인:1,</th>
+                                <th class="col-status">튬붕호/사업자</th>
+                                <th class="col-tracking">전화번호</th>
+                                <th class="col-forward-no">전화번호2</th>
+                                <th class="col-forward-name">우편번호</th>
+                                <th class="col-addr1">주소1</th>
+                                <th class="col-addr2">주소2</th>
+                                <th class="col-memo">메모</th>
+                                <th class="col-product">상품이름</th>
+                                <th class="col-qty">갯수</th>
+                                <th class="col-price">단가</th>
+                                <th class="col-hscode">HS CODE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>336</td>
+                                <td><span class="platform-badge naver">김연정</span></td>
+                                <td>0.8</td>
+                                <td>20250710</td>
+                                <td>2</td>
+                                <td>1</td>
+                                <td>P160020</td>
+                                <td>1010-6215-0519</td>
+                                <td>22106</td>
+                                <td>인천광역시삼성갤슘</td>
+                                <td>(비타프로</td>
+                                <td>Double W</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>2</td>
+                                <td>12.95</td>
+                                <td>210690</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>335</td>
+                                <td><span class="platform-badge coupang">이승민</span></td>
+                                <td>1.2</td>
+                                <td>20250710</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>P160021</td>
+                                <td>1010-3425-7821</td>
+                                <td>15342</td>
+                                <td>서울특별시강남구</td>
+                                <td>Banana Boat</td>
+                                <td>Kids SPF100</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>1</td>
+                                <td>18.99</td>
+                                <td>330499</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>334</td>
+                                <td><span class="platform-badge naver">박해민</span></td>
+                                <td>0.5</td>
+                                <td>20250710</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>P160022</td>
+                                <td>1010-9876-5432</td>
+                                <td>34567</td>
+                                <td>부산광역시해운대구</td>
+                                <td>조도화</td>
+                                <td>훌라</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>3</td>
+                                <td>9.50</td>
+                                <td>640399</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>333</td>
+                                <td><span class="platform-badge coupang">최지우</span></td>
+                                <td>2.3</td>
+                                <td>20250710</td>
+                                <td>2</td>
+                                <td>1</td>
+                                <td>P160023</td>
+                                <td>1010-1234-5678</td>
+                                <td>45678</td>
+                                <td>대구광역시중구</td>
+                                <td>이혁민</td>
+                                <td>배송대행</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>1</td>
+                                <td>45.50</td>
+                                <td>620333</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>332</td>
+                                <td><span class="platform-badge naver">정수현</span></td>
+                                <td>1.5</td>
+                                <td>20250710</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>P160024</td>
+                                <td>1010-5555-6666</td>
+                                <td>56789</td>
+                                <td>광주광역시서구</td>
+                                <td>김연정</td>
+                                <td>미국배송</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>2</td>
+                                <td>14.00</td>
+                                <td>392690</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>331</td>
+                                <td><span class="platform-badge coupang">강민준</span></td>
+                                <td>0.9</td>
+                                <td>20250709</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>P160025</td>
+                                <td>1010-7777-8888</td>
+                                <td>67890</td>
+                                <td>경기도성남시분당구</td>
+                                <td>Nature's Way</td>
+                                <td>Vitamin C</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>2</td>
+                                <td>15.99</td>
+                                <td>210690</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>330</td>
+                                <td><span class="platform-badge naver">임서연</span></td>
+                                <td>1.8</td>
+                                <td>20250709</td>
+                                <td>2</td>
+                                <td>1</td>
+                                <td>P160026</td>
+                                <td>1010-9999-0000</td>
+                                <td>78901</td>
+                                <td>전라북도전주시</td>
+                                <td>CeraVe</td>
+                                <td>Moisturizing</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>1</td>
+                                <td>24.99</td>
+                                <td>330499</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>329</td>
+                                <td><span class="platform-badge coupang">윤재현</span></td>
+                                <td>2.5</td>
+                                <td>20250709</td>
+                                <td>3</td>
+                                <td>1</td>
+                                <td>P160027</td>
+                                <td>1010-1111-2222</td>
+                                <td>89012</td>
+                                <td>충청남도천안시</td>
+                                <td>Nike Air Max</td>
+                                <td>270 React</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>1</td>
+                                <td>150.00</td>
+                                <td>640411</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>328</td>
+                                <td><span class="platform-badge naver">조하은</span></td>
+                                <td>1.2</td>
+                                <td>20250709</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>P160028</td>
+                                <td>1010-3333-4444</td>
+                                <td>90123</td>
+                                <td>경상북도포항시</td>
+                                <td>Garden of Life</td>
+                                <td>Raw Meal</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>1</td>
+                                <td>35.50</td>
+                                <td>620399</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>327</td>
+                                <td><span class="platform-badge coupang">박지성</span></td>
+                                <td>0.8</td>
+                                <td>20250708</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>P160029</td>
+                                <td>1010-5555-6666</td>
+                                <td>01234</td>
+                                <td>강원도강릉시</td>
+                                <td>NOW Foods</td>
+                                <td>Omega-3</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>2</td>
+                                <td>19.99</td>
+                                <td>392690</td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-pagination">
+                    <div class="pagination-info">
+                        전체 336건 중 1-10건 표시
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="page-btn" disabled>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                            </svg>
+                        </button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn">2</button>
+                        <button class="page-btn">3</button>
+                        <button class="page-btn">4</button>
+                        <button class="page-btn">5</button>
+                        <button class="page-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/spinner_manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/common_sidebar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/theme_toggle.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main_content_loader.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/orders.js') }}"></script>
+</body>
+</html>

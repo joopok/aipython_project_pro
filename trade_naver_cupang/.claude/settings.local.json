@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(brew install:*)",
+      "Bash(python3.9:*)",
+      "Bash(ls:*)",
+      "Bash(source:*)",
+      "Bash(pip install:*)",
+      "Bash(mkdir:*)",
+      "Bash(python:*)",
+      "Bash(curl:*)",
+      "Bash(pkill:*)",
+      "Bash(kill:*)",
+      "Bash(chmod:*)",
+      "Bash(touch:*)",
+      "WebFetch(domain:apicenter.commerce.naver.com)",
+      "WebFetch(domain:www.jaenung.net)",
+      "WebFetch(domain:github.com)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(export:*)",
+      "Bash(brew services start:*)",
+      "Bash(mysql:*)",
+      "Bash(cp:*)",
+      "Bash(ping:*)",
+      "Bash(cat:*)",
+      "Bash(rm:*)",
+      "Bash(./deploy_synology.sh:*)",
+      "Bash(tar:*)",
+      "Bash(ssh:*)",
+      "Bash(FLASK_RUN_PORT=5001 python app.py)",
+      "WebFetch(domain:developers.coupangcorp.com)",
+      "Bash(true)"
+    ],
+    "deny": []
+  }
+}

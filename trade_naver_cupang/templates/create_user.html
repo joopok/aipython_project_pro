@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>새 사용자 추가 - LogiFlow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/common_sidebar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/create_user.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/spinner.css') }}">
+</head>
+<body>
+    <!-- 사이드바 포함 -->
+    {% include 'includes/sidebar.html' %}
+    
+    <!-- 메인 컨텐츠 -->
+    <main class="main-content">
+        <!-- 헤더 포함 -->
+        {% include 'includes/header.html' %}
+        
+        <div class="content-wrapper">
+            <!-- 페이지 헤더 -->
+            <div class="page-header">
+                <div class="header-content">
+                    <div class="breadcrumb">
+                        <a href="{{ url_for('main.users') }}" class="breadcrumb-link">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M15 18l-6-6 6-6"/>
+                            </svg>
+                            사용자 관리
+                        </a>
+                        <span class="breadcrumb-separator">/</span>
+                        <span class="breadcrumb-current">새 사용자 추가</span>
+                    </div>
+                    <h1 class="page-title">새 사용자 추가</h1>
+                    <p class="page-description">시스템에 접근할 수 있는 새로운 사용자를 등록합니다</p>
+                </div>
+            </div>
+
+            <!-- 플래시 메시지 -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="notification notification-{{ category }}">
+                            <div class="notification-content">
+                                <svg class="notification-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    {% if category == 'success' %}
+                                    <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+                                    {% elif category == 'error' %}
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                                    {% else %}
+                                    <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                                    {% endif %}
+                                </svg>
+                                <span>{{ message }}</span>
+                            </div>
+                            <button class="notification-close" onclick="this.parentElement.remove()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- 사용자 생성 폼 -->
+            <div class="form-layout">
+                <div class="form-main">
+                    <div class="form-card">
+                        <form method="POST" action="{{ url_for('main.create_user') }}" class="user-form">
+                            <div class="form-section">
+                                <h2 class="section-title">기본 정보</h2>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="username" class="form-label">
+                                            아이디
+                                            <span class="required">*</span>
+                                        </label>
+                                        <div class="input-wrapper">
+                                            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                                            </svg>
+                                            <input type="text" id="username" name="username" required 
+                                                   class="form-input with-icon"
+                                                   placeholder="영문, 숫자 조합 4-20자" 
+                                                   pattern="[a-zA-Z0-9]{4,20}"
+                                                   title="영문, 숫자 조합 4-20자">
+                                        </div>
+                                        <span class="form-hint">로그인에 사용할 고유한 아이디입니다</span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="email" class="form-label">
+                                            이메일
+                                            <span class="required">*</span>
+                                        </label>
+                                        <div class="input-wrapper">
+                                            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                                            </svg>
+                                            <input type="email" id="email" name="email" required 
+                                                   class="form-input with-icon"
+                                                   placeholder="example@email.com">
+                                        </div>
+                                        <span class="form-hint">알림 및 비밀번호 재설정에 사용됩니다</span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="full_name" class="form-label">
+                                            이름
+                                            <span class="required">*</span>
+                                        </label>
+                                        <div class="input-wrapper">
+                                            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                            </svg>
+                                            <input type="text" id="full_name" name="full_name" required 
+                                                   class="form-input with-icon"
+                                                   placeholder="실명을 입력하세요">
+                                        </div>
+                                        <span class="form-hint">사용자의 실제 이름입니다</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h2 class="section-title">보안 설정</h2>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="password" class="form-label">
+                                            비밀번호
+                                            <span class="required">*</span>
+                                        </label>
+                                        <div class="input-wrapper">
+                                            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                                            </svg>
+                                            <input type="password" id="password" name="password" required 
+                                                   class="form-input with-icon"
+                                                   placeholder="최소 6자 이상"
+                                                   minlength="6">
+                                            <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <div class="password-strength" id="passwordStrength">
+                                            <div class="strength-bar">
+                                                <div class="strength-fill"></div>
+                                            </div>
+                                            <span class="strength-text">비밀번호 강도</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="password_confirm" class="form-label">
+                                            비밀번호 확인
+                                            <span class="required">*</span>
+                                        </label>
+                                        <div class="input-wrapper">
+                                            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                                            </svg>
+                                            <input type="password" id="password_confirm" name="password_confirm" required 
+                                                   class="form-input with-icon"
+                                                   placeholder="비밀번호를 다시 입력하세요">
+                                            <button type="button" class="password-toggle" onclick="togglePassword('password_confirm')">
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <span class="form-hint" id="passwordMatch">비밀번호가 일치하는지 확인합니다</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h2 class="section-title">권한 설정</h2>
+                                <div class="role-selector">
+                                    <label class="role-option">
+                                        <input type="radio" name="role" value="user" checked>
+                                        <div class="role-card">
+                                            <div class="role-icon">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                                </svg>
+                                            </div>
+                                            <div class="role-info">
+                                                <h3 class="role-title">일반 사용자</h3>
+                                                <p class="role-description">기본 권한으로 주문 조회 및 관리 가능</p>
+                                            </div>
+                                        </div>
+                                    </label>
+
+                                    <label class="role-option">
+                                        <input type="radio" name="role" value="manager">
+                                        <div class="role-card">
+                                            <div class="role-icon role-icon-manager">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                                </svg>
+                                            </div>
+                                            <div class="role-info">
+                                                <h3 class="role-title">매니저</h3>
+                                                <p class="role-description">상품 관리 및 정산 관리 권한 추가</p>
+                                            </div>
+                                        </div>
+                                    </label>
+
+                                    <label class="role-option">
+                                        <input type="radio" name="role" value="admin">
+                                        <div class="role-card">
+                                            <div class="role-icon role-icon-admin">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                                                </svg>
+                                            </div>
+                                            <div class="role-info">
+                                                <h3 class="role-title">관리자</h3>
+                                                <p class="role-description">시스템 설정 및 사용자 관리 권한 포함</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary btn-large">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M9 11l3 3L22 4"/>
+                                        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                                    </svg>
+                                    사용자 생성
+                                </button>
+                                <a href="{{ url_for('main.users') }}" class="btn-secondary">
+                                    취소
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="form-sidebar">
+                    <div class="help-card">
+                        <h3 class="help-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
+                            </svg>
+                            도움말
+                        </h3>
+                        <div class="help-content">
+                            <h4>아이디 규칙</h4>
+                            <ul>
+                                <li>영문자와 숫자만 사용 가능</li>
+                                <li>4자 이상 20자 이하</li>
+                                <li>중복 불가</li>
+                            </ul>
+                            
+                            <h4>비밀번호 규칙</h4>
+                            <ul>
+                                <li>최소 6자 이상</li>
+                                <li>영문, 숫자, 특수문자 혼합 권장</li>
+                            </ul>
+                            
+                            <h4>권한 설명</h4>
+                            <ul>
+                                <li><strong>일반 사용자</strong>: 주문 조회 및 관리</li>
+                                <li><strong>매니저</strong>: 상품 및 정산 관리</li>
+                                <li><strong>관리자</strong>: 전체 시스템 관리</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 스크립트 -->
+    <script src="{{ url_for('static', filename='js/common_sidebar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/theme_toggle.js') }}"></script>
+    <script>
+        // 비밀번호 표시/숨기기
+        function togglePassword(fieldId) {
+            const input = document.getElementById(fieldId);
+            const button = input.nextElementSibling;
+            const icon = button.querySelector('svg path');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.setAttribute('d', 'M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21');
+            } else {
+                input.type = 'password';
+                icon.setAttribute('d', 'M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z');
+            }
+        }
+
+        // 비밀번호 강도 체크
+        const passwordInput = document.getElementById('password');
+        const passwordConfirmInput = document.getElementById('password_confirm');
+        const strengthFill = document.querySelector('.strength-fill');
+        const strengthText = document.querySelector('.strength-text');
+        const passwordMatch = document.getElementById('passwordMatch');
+
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            
+            if (password.length >= 8) strength++;
+            if (password.length >= 12) strength++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            if (/\d/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            
+            if (strength < 2) {
+                strengthFill.className = 'strength-fill weak';
+                strengthText.textContent = '약함';
+            } else if (strength < 4) {
+                strengthFill.className = 'strength-fill medium';
+                strengthText.textContent = '보통';
+            } else {
+                strengthFill.className = 'strength-fill strong';
+                strengthText.textContent = '강함';
+            }
+        }
+
+        passwordInput.addEventListener('input', function() {
+            checkPasswordStrength(this.value);
+            checkPasswordMatch();
+        });
+
+        // 비밀번호 일치 확인
+        function checkPasswordMatch() {
+            if (passwordConfirmInput.value === '') {
+                passwordMatch.textContent = '비밀번호가 일치하는지 확인합니다';
+                passwordMatch.className = 'form-hint';
+            } else if (passwordInput.value === passwordConfirmInput.value) {
+                passwordMatch.textContent = '✓ 비밀번호가 일치합니다';
+                passwordMatch.className = 'form-hint match';
+                passwordConfirmInput.setCustomValidity('');
+            } else {
+                passwordMatch.textContent = '✗ 비밀번호가 일치하지 않습니다';
+                passwordMatch.className = 'form-hint no-match';
+                passwordConfirmInput.setCustomValidity('비밀번호가 일치하지 않습니다.');
+            }
+        }
+
+        passwordConfirmInput.addEventListener('input', checkPasswordMatch);
+
+        // 아이디 입력 제한 (영문, 숫자만)
+        document.getElementById('username').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
+        });
+
+        // 폼 제출 전 최종 검증
+        document.querySelector('.user-form').addEventListener('submit', function(e) {
+            checkPasswordMatch();
+        });
+    </script>
+    
+    <script src="{{ url_for('static', filename='js/spinner_manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main_content_loader.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+{
+  "deployment": {
+    "nas": {
+      "host": "192.168.0.109",
+      "port": 22,
+      "user": "joopok",
+      "remote_dir": "/volume1/homes/joopok/python/logiflow"
+    },
+    "service": {
+      "port": 7000,
+      "workers": 2,
+      "timeout": 120,
+      "log_level": "info"
+    },
+    "backup": {
+      "enabled": true,
+      "retention_days": 7
+    },
+    "python": {
+      "version": "3.9",
+      "path": "/usr/local/bin/python3.9"
+    }
+  },
+  "environments": {
+    "dev": {
+      "debug": true,
+      "env_file": ".env"
+    },
+    "prod": {
+      "debug": false,
+      "env_file": ".env.production"
+    }
+  },
+  "exclude_patterns": [
+    ".git",
+    "__pycache__",
+    "*.pyc",
+    ".env*",
+    "venv",
+    "logs",
+    ".DS_Store",
+    "*.log",
+    "*.db",
+    "*.sqlite",
+    "node_modules",
+    "*.tar.gz"
+  ]
+}

@@ -1,0 +1,428 @@
+/* 배송 추적 페이지 전용 스타일 */
+
+        /* 검색 필터 섹션 */
+        .filter-section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .filter-header h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .filter-input, .filter-select {
+            padding: 10px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .filter-input:focus, .filter-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .search-btn-group {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #f7fafc;
+            border-color: #cbd5e0;
+        }
+
+        /* 테이블 스타일 */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .result-count {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: #f7fafc;
+        }
+
+        th {
+            padding: 16px 24px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 20px 24px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 14px;
+            color: #2d3748;
+        }
+
+        tr:hover {
+            background-color: #f7fafc;
+        }
+
+        /* 상태 뱃지 */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            gap: 6px;
+        }
+
+        .status-badge.delivered {
+            background: rgba(72, 187, 120, 0.1);
+            color: #48bb78;
+        }
+
+        .status-badge.in-transit {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .status-badge.pending {
+            background: rgba(237, 137, 54, 0.1);
+            color: #ed8936;
+        }
+
+        .status-badge.failed {
+            background: rgba(245, 101, 101, 0.1);
+            color: #f56565;
+        }
+
+        /* 운송사 뱃지 */
+        .carrier-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #edf2f7;
+            color: #4a5568;
+        }
+
+        /* 액션 버튼 */
+        .action-btn {
+            padding: 6px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #4a5568;
+        }
+
+        .action-btn:hover {
+            border-color: #cbd5e0;
+            background-color: #f7fafc;
+        }
+
+        /* 페이지네이션 */
+        .table-pagination {
+            padding: 20px 24px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .page-btn {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 36px;
+            text-align: center;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            border-color: #cbd5e0;
+            background-color: #f7fafc;
+        }
+
+        .page-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 체크박스 */
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #667eea;
+            cursor: pointer;
+        }
+
+        /* 다크 모드 - 배송 추적 페이지 전용 스타일 */
+
+body[data-theme="dark"] .filter-section {
+    background: #2d3748;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+body[data-theme="dark"] .filter-header h2 {
+    color: #e2e8f0;
+}
+
+body[data-theme="dark"] .filter-group .filter-label {
+    color: #a0aec0;
+}
+
+body[data-theme="dark"] .filter-input,
+body[data-theme="dark"] .filter-select {
+    background: #4a5568;
+    border-color: #667eea;
+    color: #e2e8f0;
+}
+
+body[data-theme="dark"] .filter-input:focus,
+body[data-theme="dark"] .filter-select:focus {
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+body[data-theme="dark"] .table-container {
+    background: #2d3748;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+body[data-theme="dark"] .table-header {
+    border-bottom: 1px solid #4a5568;
+}
+
+body[data-theme="dark"] .table-title {
+    color: #e2e8f0;
+}
+
+body[data-theme="dark"] .result-count {
+    color: #a0aec0;
+}
+
+body[data-theme="dark"] .btn-secondary {
+    background: #2d3748;
+    color: #e2e8f0;
+    border: 1px solid #4a5568;
+}
+
+body[data-theme="dark"] .btn-secondary:hover {
+    background: #4a5568;
+    border-color: #667eea;
+}
+
+body[data-theme="dark"] table {
+    color: #e2e8f0;
+}
+
+body[data-theme="dark"] thead {
+    background-color: #4a5568;
+}
+
+body[data-theme="dark"] th {
+    color: #e2e8f0;
+}
+
+body[data-theme="dark"] td {
+    border-top: 1px solid #4a5568;
+    color: #e2e8f0;
+    background: #2d3748;
+}
+
+body[data-theme="dark"] tr:hover {
+    background-color: #4a5568;
+}
+
+body[data-theme="dark"] .carrier-badge {
+    background: #667eea;
+    color: white;
+}
+
+body[data-theme="dark"] .action-btn {
+    border: 1px solid #4a5568;
+    background: #2d3748;
+    color: #e2e8f0;
+}
+
+body[data-theme="dark"] .action-btn:hover {
+    border-color: #667eea;
+    background-color: #4a5568;
+}
+
+body[data-theme="dark"] .table-pagination {
+    border-top: 1px solid #4a5568;
+}
+
+body[data-theme="dark"] .pagination-info {
+    color: #a0aec0;
+}
+
+body[data-theme="dark"] .page-btn {
+    border: 1px solid #4a5568;
+    background: #2d3748;
+    color: #e2e8f0;
+}
+
+body[data-theme="dark"] .page-btn:hover:not(:disabled) {
+    border-color: #667eea;
+    background-color: #4a5568;
+}
+
+body[data-theme="dark"] input[type="checkbox"] {
+    accent-color: #667eea;
+}
+
+
+/* 반응형 - 배송 추적 페이지 전용 */
+        @media (max-width: 768px) {
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 12px;
+            }
+        }
+    

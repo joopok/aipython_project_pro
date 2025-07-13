@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiFlow - 통합 주문조회</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/common_sidebar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/integrated_orders.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/spinner.css') }}">
+</head>
+<body data-theme="light">
+    {% include 'includes/sidebar.html' %}
+
+    <!-- 메인 컨텐츠 -->
+    <main class="main-content" id="mainContent">
+        {% include 'includes/header.html' %}
+
+        <!-- 컨텐츠 -->
+        <div class="content">
+            <!-- 페이지 헤더 -->
+            <div class="page-header">
+                <h1 class="page-title">통합 주문조회</h1>
+                <p class="page-description">네이버와 쿠팡의 모든 주문을 한눈에 확인하세요</p>
+            </div>
+
+            <!-- 필터 섹션 -->
+            <div class="filter-section">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>주문일자</label>
+                        <div class="date-range">
+                            <input type="date" id="startDate" class="form-control">
+                            <span class="date-separator">~</span>
+                            <input type="date" id="endDate" class="form-control">
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>플랫폼</label>
+                        <select id="platform" class="form-control">
+                            <option value="">전체</option>
+                            <option value="NAVER">네이버</option>
+                            <option value="COUPANG">쿠팡</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>주문상태</label>
+                        <select id="orderStatus" class="form-control">
+                            <option value="">전체</option>
+                            <option value="PAYMENT_WAITING">결제대기</option>
+                            <option value="ACCEPT">결제완료</option>
+                            <option value="INSTRUCT">상품준비중</option>
+                            <option value="DEPARTURE">배송지시</option>
+                            <option value="DELIVERING">배송중</option>
+                            <option value="FINAL_DELIVERY">배송완료</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>검색</label>
+                        <input type="text" id="searchText" class="form-control" placeholder="주문번호, 주문자명, 상품명">
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn btn-primary" onclick="searchOrders()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                            </svg>
+                            조회
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetFilters()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+                            </svg>
+                            초기화
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- 동기화 헤더 -->
+
+            <!-- 통계 카드 -->
+            <div class="stats-section">
+                <div class="stats-cards">
+                    <div class="stat-card total">
+                        <div class="stat-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label">전체 주문</div>
+                            <div class="stat-value" id="totalOrders">0</div>
+                            <div class="stat-detail">
+                                <span class="platform-stat naver">
+                                    <span class="platform-logo">N</span>
+                                    <span id="naverTotal">0</span>
+                                </span>
+                                <span class="platform-stat coupang">
+                                    <span class="platform-logo">C</span>
+                                    <span id="coupangTotal">0</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card new">
+                        <div class="stat-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label">신규 주문</div>
+                            <div class="stat-value" id="newOrders">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card delivering">
+                        <div class="stat-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label">배송중</div>
+                            <div class="stat-value" id="deliveringOrders">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card revenue">
+                        <div class="stat-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1.93.55 1.77 2.31 1.77 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label">총 매출</div>
+                            <div class="stat-value" id="totalRevenue">₩0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 주문 테이블 -->
+            <div class="table-container">
+                <div class="table-header">
+                    <div>
+                        <h2 class="table-title">주문 목록</h2>
+                        <span class="result-count"><span id="totalCount">0</span>건 조회됨</span>
+                    </div>
+                    <div class="table-actions">
+                        <button class="action-btn excel" onclick="exportOrders()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                            </svg>
+                            엑셀 다운로드
+                        </button>
+                    </div>
+                </div>
+
+                <div class="excel-table-wrapper">
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th class="col-platform">플랫폼</th>
+                                <th class="col-date">주문일시</th>
+                                <th class="col-order-id">주문번호</th>
+                                <th class="col-platform-order">플랫폼주문번호</th>
+                                <th class="col-product">상품명</th>
+                                <th class="col-qty">수량</th>
+                                <th class="col-orderer">주문자</th>
+                                <th class="col-receiver">수취인</th>
+                                <th class="col-amount">결제금액</th>
+                                <th class="col-status">주문상태</th>
+                                <th class="col-company">택배사</th>
+                                <th class="col-tracking">송장번호</th>
+                                <th class="col-address">배송지</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <!-- 동적으로 생성됨 -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-empty" id="emptyMessage" style="display: none;">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="#e0e0e0">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/>
+                    </svg>
+                    <p>조회된 주문이 없습니다.</p>
+                </div>
+
+                <!-- 페이지네이션 -->
+                <div class="table-pagination">
+                    <div class="pagination-info">
+                        1-20 of <span id="totalRecords">0</span> 건
+                    </div>
+                    <div class="pagination-controls" id="pagination">
+                        <!-- 동적으로 생성됨 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/common_sidebar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/spinner_manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/debug_spinner.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/theme_toggle.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/integrated_orders.js') }}"></script>
+</body>
+</html>
