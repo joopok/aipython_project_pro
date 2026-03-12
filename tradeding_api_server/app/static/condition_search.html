@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>조건검색 (ka10172)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Malgun Gothic', sans-serif; background: #1a1a2e; color: #eee; padding: 20px; }
+  h1 { text-align: center; margin-bottom: 24px; color: #e94560; font-size: 22px; }
+
+  .panel { background: #16213e; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .panel-title { font-size: 14px; color: #888; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* 컨트롤 영역 */
+  .controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  select, button { padding: 10px 16px; border-radius: 6px; border: 1px solid #333; font-size: 14px; }
+  select { background: #0f3460; color: #eee; flex: 1; min-width: 200px; cursor: pointer; }
+  select:disabled { opacity: 0.5; }
+  button { cursor: pointer; font-weight: bold; border: none; transition: all 0.2s; }
+  button:hover { transform: translateY(-1px); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-load { background: #e94560; color: #fff; }
+  .btn-search { background: #0f3460; color: #fff; }
+  .btn-search-all { background: #533483; color: #fff; }
+
+  .exchange-group { display: flex; gap: 6px; }
+  .exchange-group label { padding: 8px 14px; background: #0f3460; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  .exchange-group input:checked + span { color: #e94560; font-weight: bold; }
+  .exchange-group input { display: none; }
+
+  /* 상태 표시 */
+  .status { padding: 10px; border-radius: 6px; font-size: 13px; margin-top: 10px; display: none; }
+  .status.loading { display: block; background: #1a3a5c; color: #7ec8e3; }
+  .status.error { display: block; background: #3a1a1a; color: #e94560; }
+  .status.success { display: block; background: #1a3a2a; color: #4ecca3; }
+
+  /* 결과 테이블 */
+  .result-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .result-count { font-size: 18px; font-weight: bold; color: #4ecca3; }
+  .result-time { font-size: 12px; color: #666; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { background: #0f3460; padding: 10px 8px; text-align: center; position: sticky; top: 0; font-size: 12px; color: #aaa; }
+  tbody td { padding: 8px; text-align: right; border-bottom: 1px solid #1a2a4a; }
+  tbody tr:hover { background: #1a2a4a; }
+  td.name { text-align: left; font-weight: bold; color: #fff; }
+  td.code { text-align: center; color: #888; font-family: monospace; }
+
+  /* 등락 색상 */
+  .up { color: #e94560; }
+  .down { color: #4e8cff; }
+  .flat { color: #888; }
+
+  .table-wrap { max-height: 600px; overflow-y: auto; border-radius: 6px; }
+  .table-wrap::-webkit-scrollbar { width: 6px; }
+  .table-wrap::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+  .empty { text-align: center; padding: 40px; color: #555; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<h1>조건검색 요청 일반 (ka10172)</h1>
+
+<!-- 조건검색식 선택 -->
+<div class="panel">
+  <div class="panel-title">1. 조건검색식 선택</div>
+  <div class="controls">
+    <button class="btn-load" id="btnLoad" onclick="loadConditions()">조건식 불러오기</button>
+    <select id="condSelect" disabled>
+      <option value="">-- 조건검색식을 불러오세요 --</option>
+    </select>
+    <div class="exchange-group">
+      <label><input type="radio" name="exchange" value="K" checked><span>KRX 전체</span></label>
+      <label><input type="radio" name="exchange" value="Q"><span>코스닥</span></label>
+    </div>
+  </div>
+  <div id="loadStatus" class="status"></div>
+</div>
+
+<!-- 조건검색 실행 -->
+<div class="panel">
+  <div class="panel-title">2. 조건검색 실행</div>
+  <div class="controls">
+    <button class="btn-search" id="btnSearch" onclick="searchCondition()" disabled>조건검색 조회</button>
+    <button class="btn-search-all" id="btnSearchAll" onclick="searchConditionAll()" disabled>전체 조회 (연속)</button>
+  </div>
+  <div id="searchStatus" class="status"></div>
+</div>
+
+<!-- 결과 -->
+<div class="panel" id="resultPanel" style="display:none;">
+  <div class="result-info">
+    <div>
+      <span class="panel-title">조회 결과</span>
+      <span class="result-count" id="resultCount">0</span><span style="color:#888; font-size:13px;">종목</span>
+    </div>
+    <span class="result-time" id="resultTime"></span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:50px">No</th>
+          <th style="width:80px">종목코드</th>
+          <th style="text-align:left">종목명</th>
+          <th style="width:100px">현재가</th>
+          <th style="width:80px">등락률</th>
+          <th style="width:80px">전일대비</th>
+          <th style="width:100px">거래량</th>
+        </tr>
+      </thead>
+      <tbody id="resultBody"></tbody>
+    </table>
+  </div>
+  <div class="empty" id="emptyMsg" style="display:none;">조건에 충족하는 종목이 없습니다.</div>
+</div>
+
+<script>
+const API_BASE = window.location.origin + '/api/kiwoom';
+
+function setStatus(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = 'status ' + type;
+  el.textContent = msg;
+}
+
+function getExchange() {
+  return document.querySelector('input[name="exchange"]:checked').value;
+}
+
+// 1. 조건검색 목록 불러오기
+async function loadConditions() {
+  const btn = document.getElementById('btnLoad');
+  const select = document.getElementById('condSelect');
+  btn.disabled = true;
+  btn.textContent = '불러오는 중...';
+  setStatus('loadStatus', 'loading', 'WebSocket 연결 중... (LOGIN → CNSRLST)');
+
+  try {
+    const resp = await fetch(API_BASE + '/condition/list', { method: 'POST' });
+    const data = await resp.json();
+
+    if (!resp.ok) throw new Error(data.detail || '조건식 불러오기 실패');
+
+    const conditions = data.conditions || [];
+    select.innerHTML = '<option value="">-- 조건검색식을 선택하세요 (' + conditions.length + '개) --</option>';
+    conditions.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.seq;
+      opt.textContent = '[' + c.seq + '] ' + c.name;
+      select.appendChild(opt);
+    });
+
+    select.disabled = false;
+    document.getElementById('btnSearch').disabled = false;
+    document.getElementById('btnSearchAll').disabled = false;
+    setStatus('loadStatus', 'success', conditions.length + '개 조건검색식 로드 완료');
+  } catch (e) {
+    setStatus('loadStatus', 'error', '오류: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '조건식 불러오기';
+  }
+}
+
+// 2. 조건검색 일반 조회
+async function searchCondition() {
+  const seq = document.getElementById('condSelect').value;
+  if (!seq) { alert('조건검색식을 선택하세요'); return; }
+
+  const btn = document.getElementById('btnSearch');
+  btn.disabled = true;
+  setStatus('searchStatus', 'loading', '조건검색 중... (LOGIN → CNSRLST → CNSRREQ)');
+
+  try {
+    const resp = await fetch(API_BASE + '/condition/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ seq: seq, stex_tp: getExchange() }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.detail || '조건검색 실패');
+
+    renderResult(data);
+    setStatus('searchStatus', 'success',
+      '조회 완료 — ' + (data.total_count || 0) + '종목' +
+      (data.cont_yn === 'Y' ? ' (연속조회 가능)' : ''));
+  } catch (e) {
+    setStatus('searchStatus', 'error', '오류: ' + e.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// 3. 전체 조회 (연속)
+async function searchConditionAll() {
+  const seq = document.getElementById('condSelect').value;
+  if (!seq) { alert('조건검색식을 선택하세요'); return; }
+
+  const btn = document.getElementById('btnSearchAll');
+  btn.disabled = true;
+  setStatus('searchStatus', 'loading', '전체 조건검색 중 (연속조회 포함)...');
+
+  try {
+    const resp = await fetch(API_BASE + '/condition/search-all', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ seq: seq, stex_tp: getExchange() }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.detail || '전체 조건검색 실패');
+
+    renderResult(data);
+    setStatus('searchStatus', 'success', '전체 조회 완료 — ' + (data.total_count || 0) + '종목');
+  } catch (e) {
+    setStatus('searchStatus', 'error', '오류: ' + e.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// 결과 렌더링
+function renderResult(data) {
+  const panel = document.getElementById('resultPanel');
+  const body = document.getElementById('resultBody');
+  const empty = document.getElementById('emptyMsg');
+  const stocks = data.stocks || [];
+
+  document.getElementById('resultCount').textContent = stocks.length;
+  document.getElementById('resultTime').textContent = new Date().toLocaleTimeString();
+
+  panel.style.display = 'block';
+
+  if (stocks.length === 0) {
+    body.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  body.innerHTML = stocks.map((s, i) => {
+    const cls = s.chg_rt > 0 ? 'up' : s.chg_rt < 0 ? 'down' : 'flat';
+    const sign = s.chg_rt > 0 ? '+' : '';
+    return `<tr>
+      <td style="text-align:center; color:#555">${i + 1}</td>
+      <td class="code">${s.stk_cd}</td>
+      <td class="name">${s.stk_nm}</td>
+      <td class="${cls}">${s.cur_prc.toLocaleString()}</td>
+      <td class="${cls}">${sign}${s.chg_rt}%</td>
+      <td class="${cls}">${sign}${s.chg_amt.toLocaleString()}</td>
+      <td>${s.volume.toLocaleString()}</td>
+    </tr>`;
+  }).join('');
+}
+</script>
+</body>
+</html>

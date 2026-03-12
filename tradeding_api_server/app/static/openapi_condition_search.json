@@ -1,0 +1,78 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "키움증권 조건검색 API",
+    "description": "키움증권 조건검색식 목록 조회 및 조건검색 실행 API",
+    "version": "v1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://author-primarily-collection-modeling.trycloudflare.com"
+    }
+  ],
+  "paths": {
+    "/api/kiwoom/condition/list": {
+      "get": {
+        "description": "HTS에 저장된 조건검색식 목록을 조회합니다",
+        "operationId": "GetConditionList",
+        "parameters": [],
+        "deprecated": false
+      }
+    },
+    "/api/kiwoom/condition/search": {
+      "get": {
+        "description": "조건검색식 번호로 종목을 검색합니다",
+        "operationId": "ConditionSearch",
+        "parameters": [
+          {
+            "name": "seq",
+            "in": "query",
+            "description": "조건검색식 일련번호",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "163"
+            }
+          },
+          {
+            "name": "stex_tp",
+            "in": "query",
+            "description": "거래소 구분 K=KRX전체 Q=코스닥",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "K",
+              "example": "K"
+            }
+          },
+          {
+            "name": "cont_yn",
+            "in": "query",
+            "description": "연속조회여부 N=최초 Y=연속",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "N",
+              "example": "N"
+            }
+          },
+          {
+            "name": "next_key",
+            "in": "query",
+            "description": "연속조회키",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "example": ""
+            }
+          }
+        ],
+        "deprecated": false
+      }
+    }
+  },
+  "components": {
+    "schemas": {}
+  }
+}
